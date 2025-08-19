@@ -81,6 +81,7 @@ export class Modify<T extends Types = Types.Any, K extends string = string> exte
                 }`]: properties ? ReadProperties(properties) : {},
             });
 
+            if (element instanceof UI) element.isExtended = true;
             callback?.(this, name);
 
             return this.override;
@@ -97,7 +98,7 @@ export class Modify<T extends Types = Types.Any, K extends string = string> exte
             return this.override;
         },
 
-        addMapping: (mapping) => {
+        addMapping: mapping => {
             this.button_mappings ||= [];
             if (!mapping) return this.override;
             if (Array.isArray(mapping)) mapping.forEach(v => this.override.addMapping(v));
@@ -130,7 +131,7 @@ export class Modify<T extends Types = Types.Any, K extends string = string> exte
             if (animation) this.anims.push(animation.getKeyIndex(startIndex || 0));
             return this.override;
         },
-    
+
         searchBinding: (
             bindingName: Binding,
             controlName?: string,
@@ -213,6 +214,7 @@ export class Modify<T extends Types = Types.Any, K extends string = string> exte
             },
 
             replace: (childName, ui, properties, elementName) => {
+                if (ui instanceof UI) ui.isExtended = true;
                 this.modifyControls.replace.push([
                     childName,
                     {
@@ -224,6 +226,7 @@ export class Modify<T extends Types = Types.Any, K extends string = string> exte
                 return this.modify.controls;
             },
             insertAfter: (childName, ui, properties, elementName) => {
+                if (ui instanceof UI) ui.isExtended = true;
                 this.modifyControls.insertAfter.push([
                     childName,
                     {
@@ -235,6 +238,7 @@ export class Modify<T extends Types = Types.Any, K extends string = string> exte
                 return this.modify.controls;
             },
             insertBefore: (childName, ui, properties, elementName) => {
+                if (ui instanceof UI) ui.isExtended = true;
                 this.modifyControls.insertBefore.push([
                     childName,
                     {
@@ -247,6 +251,7 @@ export class Modify<T extends Types = Types.Any, K extends string = string> exte
             },
 
             insertBack: (ui, properties, elementName) => {
+                if (ui instanceof UI) ui.isExtended = true;
                 this.modifyControls.insertBack.push({
                     [`${elementName || Random.getName()}@${
                         typeof ui === "string" ? ui : ui.getPath()
@@ -255,6 +260,7 @@ export class Modify<T extends Types = Types.Any, K extends string = string> exte
                 return this.modify.controls;
             },
             insertFront: (ui, properties, elementName) => {
+                if (ui instanceof UI) ui.isExtended = true;
                 this.modifyControls.insertFront.push({
                     [`${elementName || Random.getName()}@${
                         typeof ui === "string" ? ui : ui.getPath()

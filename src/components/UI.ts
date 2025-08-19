@@ -41,8 +41,7 @@ import { Animation } from "./Animation";
 import { Modify } from "./Modify";
 import { Random } from "./Random";
 
-type ExtractUIType<T, K extends Types = Types.Any>
-    = T extends UI<infer U>
+type ExtractUIType<T, K extends Types = Types.Any> = T extends UI<infer U>
     ? U
     : T extends Modify<infer U>
     ? U
@@ -62,8 +61,12 @@ export class UI<T extends Types = Types.Any> {
     namespace?: string;
     extends?: string;
     sourceBindings: Record<string, string> = {};
+
+    isExtended = false;
+    addCount = 0;
+
     private type?: Types;
-    private controls?: Array<ChildElement>;
+    private controls?: Array<ChildElement | Record<string, UI>>;
     private bindings?: Array<BindingInterface>;
     private button_mappings?: Array<ButtonMapping>;
     private variables?: VariablesInterface;
@@ -89,7 +92,8 @@ export class UI<T extends Types = Types.Any> {
 
                 if (identifier.extends instanceof UI)
                     this.extends = `${identifier.extends.getPath()}`;
-                else if (identifier.extends instanceof Modify) this.extends = identifier.extends.getPath();
+                else if (identifier.extends instanceof Modify)
+                    this.extends = identifier.extends.getPath();
                 else if (typeof identifier.extends === "string") this.extends = identifier.extends;
                 else this.extends = `${identifier.extends.namespace}.${identifier.extends.name}`;
             } else {
@@ -360,9 +364,13 @@ export class UI<T extends Types = Types.Any> {
                 [`${name}@${element}`]: properties ? ReadProperties(<Properties>properties) : {},
             });
         } else if (element instanceof UI || element instanceof Modify) {
-            {
-                if (element?.getPath() === this.getPath()) {
-                    Log.warning(`${CurrentLine()} child element should have a unique name!`);
+            if (element?.getPath() === this.getPath())
+                Log.warning(`${CurrentLine()} child element should have a unique name!`);
+
+            if (properties || element instanceof Modify) {
+                if (element instanceof UI) {
+                    element.isExtended = true;
+                    element.addCount++;
                 }
 
                 this.controls.push({
@@ -370,6 +378,9 @@ export class UI<T extends Types = Types.Any> {
                         ? ReadProperties(<Properties>properties)
                         : {},
                 });
+            } else {
+                element.addCount++;
+                this.controls.push({ [name]: element });
             }
         }
 
@@ -446,6 +457,20 @@ export class UI<T extends Types = Types.Any> {
                 });
             });
 
+        code.controls = this.controls?.map(control => {
+            const key = Object.keys(control)[0];
+            const element = control[key];
+
+            if (element instanceof UI) {
+                if (element.isExtended || element.addCount > 1)
+                    return { [`${key}@${element.getPath()}`]: {} };
+                else
+                    return {
+                        [key]: element.getUI(),
+                    };
+            } else return control;
+        });
+
         return code;
     }
 
@@ -469,12 +494,12 @@ export class UI<T extends Types = Types.Any> {
         });
     }
 
-    private static apply() { }
+    private static apply() {}
     private static arguments = "";
-    private static bind() { }
-    private static call() { }
+    private static bind() {}
+    private static call() {}
     private static caller = "";
     private static length = "";
     private static name = "";
-    private static toString() { }
+    private static toString() {}
 }
