@@ -21,17 +21,21 @@ export class UIBuilder {
         for (const file in build) {
             const namespace = build[file].namespace;
             delete build[file].namespace;
+
+            let compileElementsCount = 0;
             for (const jsonUI in build[file]) {
                 const element = build[file][jsonUI];
                 if (element instanceof UI && element.addCount < 2 && !element.isExtended)
                     build[file][jsonUI] = undefined;
-                else build[file][jsonUI] = element.getUI();
+                else {
+                    build[file][jsonUI] = element.getUI();
+                    compileElementsCount++;
+                }
             }
 
-            console.timeLog(
-                "COMPILER",
-                `${file} ${Object.keys(build[file]).length} elements has generated!`
-            );
+            if (!compileElementsCount) continue;
+
+            console.timeLog("COMPILER", `${file} ${!compileElementsCount} elements has generated!`);
 
             build[file].namespace = namespace;
             UIWriteJson(`${installPath}/@/${file}`, build[file], "utf-8");
