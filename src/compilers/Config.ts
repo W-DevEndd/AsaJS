@@ -15,6 +15,7 @@ const defaultConfig: Config = {
             nameLength: 32,
             namespaceAmount: 16,
             namespaceLength: 32,
+            optimizeControls: true,
             obfuscateName: false,
             obfuscateType: false,
         },
@@ -50,6 +51,7 @@ interface ConfigManifest {
 interface ConfigCompilerUI {
     obfuscateName: boolean;
     obfuscateType: boolean;
+    optimizeControls: boolean;
     nameLength: number;
     namespaceLength: number;
     namespaceAmount: number;

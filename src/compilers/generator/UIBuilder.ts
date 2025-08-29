@@ -5,6 +5,7 @@ import { SearchFiles } from "./SearchFiles";
 import { GenerateDir } from "./GenerateDir";
 import { UIWriteJson } from "../PreCompile";
 import { UI } from "../../components/UI";
+import { Configs } from "../Config";
 
 export class UIBuilder {
     static delete(installPath: string): void {
@@ -17,6 +18,7 @@ export class UIBuilder {
 
     static jsonUI(installPath: string): number {
         const build = <any>JsonBuilder.save.build;
+        const config = Configs.getConfig();
         let count = 0;
         for (const file in build) {
             const namespace = build[file].namespace;
@@ -25,7 +27,12 @@ export class UIBuilder {
             let compileElementsCount = 0;
             for (const jsonUI in build[file]) {
                 const element = build[file][jsonUI];
-                if (element instanceof UI && element.addCount < 2 && !element.isExtended)
+                if (
+                    element instanceof UI &&
+                    element.addCount < 2 &&
+                    !element.isExtended &&
+                    config.compiler.UI.optimizeControls
+                )
                     build[file][jsonUI] = undefined;
                 else {
                     build[file][jsonUI] = element.getUI();

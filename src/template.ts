@@ -24,6 +24,7 @@ const config = {
             nameLength: 32,
             namespaceAmount: 16,
             namespaceLength: 32,
+            optimizeControls: true,
             obfuscateName: false,
             obfuscateType: false,
         },

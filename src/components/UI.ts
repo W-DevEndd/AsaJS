@@ -355,9 +355,8 @@ export class UI<T extends Types = Types.Any> {
 
         name ||= Random.getName();
 
-        if (this.isDuplicate(name)) {
+        if (this.isDuplicate(name))
             Log.warning(`${CurrentLine()} child element should have a unique name!`);
-        }
 
         if (typeof element === "string") {
             this.controls.push({
@@ -432,6 +431,7 @@ export class UI<T extends Types = Types.Any> {
 
     getUI() {
         const code: any = ReadProperties(<any>(this.properties ?? {}));
+        const config = Configs.getConfig();
 
         for (const key of ["type", "controls", "bindings", "button_mappings", "anims"])
             if ((<any>this)[key]) code[key] = (<any>this)[key];
@@ -462,7 +462,11 @@ export class UI<T extends Types = Types.Any> {
             const element = control[key];
 
             if (element instanceof UI) {
-                if (element.isExtended || element.addCount > 1)
+                if (
+                    element.isExtended ||
+                    element.addCount > 1 ||
+                    !config.compiler.UI.optimizeControls
+                )
                     return { [`${key}@${element.getPath()}`]: {} };
                 else
                     return {
