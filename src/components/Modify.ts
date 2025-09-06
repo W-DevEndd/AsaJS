@@ -306,9 +306,9 @@ export class Modify<T extends Types = Types.Any, K extends string = string> exte
             if ((<any>this)[key]) code[key] = (<any>this)[key];
 
         if (this.variables) code.variables;
-        if (this.variables && Object(this.variables).length !== 0)
+        if (this.variables && Object.keys(this.variables).length !== 0)
             Obj.forEach(this.variables, (k, v) => {
-                code.variables.push({
+                (code.variables ||= []).push({
                     requires: k,
                     ...v,
                 });
