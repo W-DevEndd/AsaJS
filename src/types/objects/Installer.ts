@@ -26,7 +26,14 @@ export enum Minecraft {
     Preview = "Microsoft.MinecraftWindowsBeta_8wekyb3d8bbwe",
 }
 
+export enum GDKMinecraft {
+    Stable = "Minecraft Bedrock",
+    Preview = "Minecraft Bedrock Preview",
+}
+
 export interface ResourcePackInterface {
-    installGame: Minecraft;
+    installGame: Minecraft | GDKMinecraft;
     installFolder: ResourcePack;
+    userFolder: string;
+    isGDK: boolean;
 }

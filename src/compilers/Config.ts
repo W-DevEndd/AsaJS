@@ -22,6 +22,8 @@ const defaultConfig: Config = {
     },
     installer: {
         autoInstall: true,
+        allowGDK: true,
+        installGDKUser: "auto",
         developEvironment: true,
         previewVersion: false,
         customPath: false,
@@ -66,6 +68,8 @@ interface ConfigCompiler {
 
 interface ConfigInstaller {
     autoInstall: boolean;
+    allowGDK: boolean;
+    installGDKUser: string;
     developEvironment: boolean;
     previewVersion: boolean;
     customPath: boolean;

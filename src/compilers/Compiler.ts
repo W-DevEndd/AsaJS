@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import { Manifest } from "./generator/Manifest";
 import { UIBuilder } from "./generator/UIBuilder";
 import { Configs } from "./Config";
@@ -10,13 +11,38 @@ import { Encoder } from "./Encoder";
 import { UIWriteJson } from "./PreCompile";
 import { localizeText } from "../components/LocalizeText";
 import { LangBuilder } from "./generator/LangBuilder";
-import { Minecraft, ResourcePack } from "../types/objects/Installer";
+import { GDKMinecraft, Minecraft, ResourcePack } from "../types/objects/Installer";
 import { ResourcePacks } from "./Installer";
+import { Save } from "./generator/Save";
 
 const config = Configs.getConfig();
 
+const installGame: Minecraft | GDKMinecraft = config.installer.previewVersion
+    ? Minecraft.Preview
+    : Minecraft.Stable;
+
+const installGameGDK: Minecraft | GDKMinecraft = config.installer.previewVersion
+    ? GDKMinecraft.Preview
+    : GDKMinecraft.Stable;
+
+const isGDKVersion = config.installer.allowGDK
+    ? fs.existsSync(path.join(process.env.APPDATA!, installGameGDK))
+    : false;
+
+export const users: string[] | null = isGDKVersion
+    ? fs
+          .readdirSync(path.join(process.env.APPDATA!, installGameGDK, "Users"), "utf-8")
+          .filter(value => value !== "Shared")
+    : null;
+
 export const installer = new ResourcePacks({
-    installGame: config.installer.previewVersion ? Minecraft.Preview : Minecraft.Stable,
+    isGDK: isGDKVersion,
+    userFolder: users?.includes(config.installer.installGDKUser)
+        ? config.installer.installGDKUser
+        : users?.length === 1
+        ? users[0]
+        : "Shared",
+    installGame: isGDKVersion ? installGameGDK : installGame,
     installFolder: config.installer.developEvironment
         ? ResourcePack.Development
         : ResourcePack.Production,
@@ -128,6 +154,9 @@ process.on("beforeExit", () => {
             Encoder.start();
             console.timeLog("COMPILER", `Encoded ${Encoder.count} JSON file(s) successfully!`);
         }
+
+        Save.build();
+        console.timeLog("COMPILER", `Cache saved!`);
 
         // Final log of compilation completion
         console.log();

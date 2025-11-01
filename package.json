@@ -25,6 +25,7 @@
         "ui-build": "bun scripts/scanner/index.ts",
         "import": "bun scripts/index.js",
         "items": "bun scripts/items.js",
+        "enum": "bun scripts/enum.ts",
         "stable": "yarn run ui-pull && yarn run ui-build && yarn run import && yarn run build",
         "preview": "yarn run stable --preview"
     },

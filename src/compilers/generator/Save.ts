@@ -4,19 +4,26 @@ import { Random } from "../../components/Random";
 import { UUID } from "../../types/objects/Manifest";
 type ReturnValue = () => any;
 
-
 export class Save extends Class {
-    static isSaveCreated: boolean = false;
+    static data: Record<string, string> = (() => {
+        if (fs.existsSync("cache")) {
+            return JSON.parse(fs.readFileSync("cache", "utf-8"));
+        } else {
+            fs.writeFileSync("cache", "{}", "utf-8");
+            return {};
+        }
+    })();
 
-    private static write(file: fs.PathOrFileDescriptor, data: string | NodeJS.ArrayBufferView, options?: fs.WriteFileOptions) {
-        fs.writeFileSync(file, JSON.stringify(data), options);
+    private static write(file: fs.PathOrFileDescriptor, data: string | NodeJS.ArrayBufferView) {
+        Save.data[String(file)] = JSON.stringify(data);
     }
 
-    private static read(path: fs.PathOrFileDescriptor, options?: {
-        encoding?: null | undefined;
-        flag?: string | undefined;
-    } | null) {
-        return JSON.parse(fs.readFileSync(path, options) as any);
+    private static read(path: fs.PathOrFileDescriptor) {
+        return JSON.parse(Save.data[String(path)]);
+    }
+
+    private static exists(path: fs.PathOrFileDescriptor) {
+        return Save.data.hasOwnProperty(String(path));
     }
 
     static createFile(
@@ -25,13 +32,11 @@ export class Save extends Class {
         write: Function = fs.writeFileSync,
         read: Function = fs.readFileSync
     ) {
-        if (!Save.isSaveCreated && !fs.existsSync(".save")) fs.mkdirSync(".save");
-        Save.isSaveCreated = true;
-        if (!fs.existsSync(`.save/${path}`)) {
+        if (!this.exists(path)) {
             const $ = data();
-            write(`.save/${path}`, $, "utf-8");
+            write(path, $, "utf-8");
             return $;
-        } else return read(`.save/${path}`, "utf-8");
+        } else return read(path, "utf-8");
     }
 
     static createJson(path: string, data: ReturnValue) {
@@ -44,9 +49,8 @@ export class Save extends Class {
         write: Function = fs.writeFileSync,
         read: Function = fs.readFileSync
     ) {
-        if (!Save.isSaveCreated && !fs.existsSync(".save")) fs.mkdirSync(".save");
-        const backup = read(`.save/${path}`, "utf-8");
-        write(`.save/${path}`, data());
+        const backup = read(path, "utf-8");
+        write(path, data());
         return backup;
     }
 
@@ -69,5 +73,9 @@ export class Save extends Class {
 
     static getBuildID() {
         return Save.createJson("buildID", () => [Random.genString(16)])[0];
+    }
+
+    static build() {
+        fs.writeFileSync("cache", JSON.stringify(Save.data), "utf-8");
     }
 }

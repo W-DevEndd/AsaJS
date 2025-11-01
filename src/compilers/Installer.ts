@@ -19,7 +19,9 @@ export class ResourcePacks {
         } else {
             switch (process.platform) {
                 case "win32":
-                    this.gamePath = `${process.env.LOCALAPPDATA}/Packages/${data.installGame}/LocalState`;
+                    this.gamePath = data.isGDK
+                        ? `${process.env.APPDATA}/${data.installGame}/Users/<USER_ID>`
+                        : `${process.env.LOCALAPPDATA}/Packages/${data.installGame}/LocalState`;
                     break;
                 case "linux":
                     this.gamePath = `${process.env.HOME}/.local/share/mcpelauncher`;
@@ -32,8 +34,17 @@ export class ResourcePacks {
         }
 
         this.gameDataPath = `${this.gamePath}/games/com.mojang`;
+
         this.installPath = `${this.gameDataPath}/${data.installFolder}`;
         this.globalResoucePacksPath = `${this.gameDataPath}/minecraftpe/global_resource_packs.json`;
+
+        if (data.isGDK) {
+            this.installPath = this.installPath.replace("<USER_ID>", "Shared");
+            this.globalResoucePacksPath = this.globalResoucePacksPath.replace(
+                "<USER_ID>",
+                data.userFolder
+            );
+        }
     }
 
     isPackInstalled(uuid: UUID, version: Version | SemverString) {
