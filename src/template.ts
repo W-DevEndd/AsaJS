@@ -30,15 +30,17 @@ const config = {
         },
     },
     installer: {
-        autoInstall: true,
-        developEvironment: true,
-        previewVersion: false,
+        autoInstall: {autoinstall},
+        allowGDK: true,
+        installGDKUser: "auto",
+        developEvironment: {development},
+        previewVersion: {preview},
         customPath: false,
         installPath: "/your/minecraft/data/path",
     },
     manifest: {
-        name: "AsaJS",
-        description: "Build with AsaJS <3",
+        name: "{packname}",
+        description: "{packdescription}",
     },
 };
 
